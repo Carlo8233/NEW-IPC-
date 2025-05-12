@@ -1,4 +1,3 @@
-// MainActivity.kt (no changes needed in the navigation setup)
 package com.example.birdapp
 
 import android.Manifest
@@ -17,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.birdapp.ui.theme.BIRDAPPTheme
 import com.example.birdapp.utils.SessionUtils
 import com.google.firebase.auth.FirebaseAuth
+import com.example.birdapp.AchievementScreen // ✅ Make sure this import is present
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,14 +58,12 @@ class MainActivity : ComponentActivity() {
                         composable("cameraalt") { CameraAltScreen(navController) }
                         composable("book") { BookScreen(navController) }
 
-                        // Gamified List Screen
+                        // ✅ Gamified List Screen (now shows achievements)
                         composable("gamifiedlist") {
-                            // Example data for gamified list
-                            val gamifiedListData = listOf("Bird 1", "Bird 2", "Bird 3")
-                            GamifiedListScreen(navController, gamifiedListData)
+                            AchievementScreen(navController)
                         }
 
-                        // Settings and the various screens related to it
+                        // Settings and related screens
                         composable("settings") { SettingsScreen(navController) }
                         composable("profileSettings") { EditProfileScreen(navController) }
                         composable("notificationsSettings") { NotificationSettingsScreen(navController) }
@@ -84,7 +82,6 @@ class MainActivity : ComponentActivity() {
     private fun requestPermissionsIfNeeded() {
         val permissionsToRequest = mutableListOf<String>()
 
-        // Request location permissions
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {

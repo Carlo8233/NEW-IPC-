@@ -17,52 +17,81 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
-// Data model for a gamified bird item
-data class GamifiedBird(
-    val name: String,
-    val imageRes: Int,
-    val points: Int
-)
-
-// Sample bird data
-val sampleBirds = listOf(
-    GamifiedBird("White-Throated Sparrow", R.drawable.whitethroatedsparrow, 20),
-    GamifiedBird("Scale-Feathered Malkoha", R.drawable.scalefeatheredmalkoha, 35),
-    GamifiedBird("Palawan Peacock Pheasant", R.drawable.palawanpeacockpheasant, 50)
+data class Achievement(
+    val id: String,
+    val title: String,
+    val description: String,
+    var unlocked: Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GamifiedListScreen(navController: NavController, gamifiedListData: List<String>) {
+fun AchievementScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
 
-    val filteredBirds = sampleBirds.filter {
-        it.name.contains(searchQuery, ignoreCase = true)
+    // Start progress at 0 so all achievements are initially locked
+    var discoverCount by remember { mutableStateOf(0) }
+    var appUsageDays by remember { mutableStateOf(0) }
+    var viewedBirds by remember { mutableStateOf(0) }
+
+    var showPopup by remember { mutableStateOf(false) }
+    var justUnlockedAchievement by remember { mutableStateOf<Achievement?>(null) }
+
+    val achievementStateList = remember {
+        mutableStateListOf(
+            Achievement("first", "First Discovery", "Discover your first bird!"),
+            Achievement("explorer", "Explorer", "Use the app for 5 days."),
+            Achievement("encyclopedia", "Bird Encyclopedia", "View 10 bird profiles.")
+        )
+    }
+
+    // Unlock logic based on actual thresholds
+    LaunchedEffect(discoverCount, appUsageDays, viewedBirds) {
+        val updatedList = achievementStateList.map { achievement ->
+            when (achievement.id) {
+                "first" -> achievement.copy(unlocked = discoverCount >= 1)
+                "explorer" -> achievement.copy(unlocked = appUsageDays >= 5)
+                "encyclopedia" -> achievement.copy(unlocked = viewedBirds >= 10)
+                else -> achievement
+            }
+        }
+
+        updatedList.forEachIndexed { i, updated ->
+            if (updated.unlocked && !achievementStateList[i].unlocked) {
+                achievementStateList[i] = updated
+                justUnlockedAchievement = updated
+                showPopup = true
+            } else {
+                achievementStateList[i] = updated
+            }
+        }
+    }
+
+    val filteredAchievements = achievementStateList.filter {
+        it.title.contains(searchQuery, ignoreCase = true)
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp) // General padding around the entire screen
+            .padding(16.dp)
     ) {
-        // 🔙 Back Button (Positioned at the top with padding and spacing)
         Button(
-            onClick = { navController.navigate("book") },
+            onClick = { navController.navigate("homepage") },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF81C784)),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .padding(top = 32.dp, bottom = 16.dp) // Increased space from the top
+                .padding(top = 32.dp, bottom = 16.dp)
         ) {
-            Text("← Back to Guidebook", fontSize = 16.sp)
+            Text("← Back to Home", fontSize = 16.sp)
         }
 
-        // Search Bar (Positioned below the back button)
         TextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            label = { Text("Search Birds") },
+            label = { Text("Search Achievements") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
@@ -73,86 +102,89 @@ fun GamifiedListScreen(navController: NavController, gamifiedListData: List<Stri
             )
         )
 
-        // Title and Description (Center-aligned)
-        Text(
-            text = "🎮 Your Bird Achievements",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF2E7D32),
-            modifier = Modifier.align(Alignment.CenterHorizontally) // Centered text
-        )
+        Text("ACHIEVEMENTS", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("View All Your Achievements Here!", fontSize = 14.sp, color = Color.Gray)
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(8.dp)) // Spacing between title and description
-
-        Text(
-            text = "Unlock badges and earn points by identifying birds!",
-            fontSize = 14.sp,
-            color = Color.Gray,
-            modifier = Modifier.align(Alignment.CenterHorizontally) // Centered text
-        )
-
-        Spacer(modifier = Modifier.height(16.dp)) // Spacing before bird list
-
-        // Bird List (Lazy Column)
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f), // Give more space to the list
-            verticalArrangement = Arrangement.spacedBy(12.dp),  // Spacing between items
-            contentPadding = PaddingValues(bottom = 16.dp)  // Padding at the bottom for scroll
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            items(filteredBirds) { bird ->
-                GamifiedBirdCard(bird)
+            items(filteredAchievements) { achievement ->
+                AchievementCard(achievement)
             }
         }
 
-        // Add the Bottom Navigation Bar here as well
         BottomNavigationBar(navController, selectedTab = 2) { newIndex ->
             when (newIndex) {
                 0 -> navController.navigate("homepage")
                 1 -> navController.navigate("cameraalt")
-                2 -> { /* Already in gamified list */ }
-                3 -> navController.navigate("settings")  // Navigate to Settings
+                2 -> {}
+                3 -> navController.navigate("settings")
             }
+        }
+
+        if (showPopup && justUnlockedAchievement != null) {
+            AlertDialog(
+                onDismissRequest = { showPopup = false },
+                confirmButton = {
+                    TextButton(onClick = { showPopup = false }) {
+                        Text("Awesome!", fontWeight = FontWeight.Bold)
+                    }
+                },
+                title = { Text("Achievement Unlocked!") },
+                text = {
+                    Column {
+                        Text(justUnlockedAchievement!!.title, fontWeight = FontWeight.Bold)
+                        Text(justUnlockedAchievement!!.description)
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun GamifiedBirdCard(bird: GamifiedBird) {
+fun AchievementCard(achievement: Achievement) {
+    val backgroundColor = if (achievement.unlocked) Color(0xFFFFF9C4) else Color(0xFFDDDDDD)
+    val titleColor = if (achievement.unlocked) Color.Black else Color.DarkGray
+    val imageRes = if (achievement.unlocked) R.drawable.unlocked_achievement else R.drawable.locked_achievement
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)  // Adding some shadow for depth
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(12.dp) // Padding inside the card
+            modifier = Modifier.padding(12.dp)
         ) {
             Image(
-                painter = painterResource(id = bird.imageRes),
-                contentDescription = bird.name,
+                painter = painterResource(id = imageRes),
+                contentDescription = achievement.title,
                 modifier = Modifier
-                    .size(70.dp)
+                    .size(60.dp)
                     .background(Color.White, shape = RoundedCornerShape(8.dp))
             )
 
-            Spacer(modifier = Modifier.width(12.dp)) // Spacing between image and text
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column {
                 Text(
-                    text = bird.name,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    text = if (achievement.unlocked) achievement.title else "Locked Achievement",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = titleColor
                 )
-                Text(
-                    text = "Points: ${bird.points}",
-                    fontSize = 14.sp,
-                    color = Color(0xFF388E3C)
-                )
+                if (achievement.unlocked) {
+                    Text(achievement.description, fontSize = 14.sp, color = Color.DarkGray)
+                }
             }
         }
     }
