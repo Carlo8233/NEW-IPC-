@@ -1,0 +1,13 @@
+train: C:\Users\ASROCK\Documents\THESIS\ipc-thesis-master\dataset\train\images
+val: C:\Users\ASROCK\Documents\THESIS\ipc-thesis-master\dataset\valid\images
+test: C:\Users\ASROCK\Documents\THESIS\ipc-thesis-master\dataset\test\images
+
+nc: 15
+names: ['Bar-tailed Godwit', 'Barn Swallow', 'Black-bellied Plover', 'Black-crowned Night Heron', 'Chirruping Nightjar', 'Eurasian Tree Sparrow', 'Gray-rumped Swiftlet', 'Great Knot', 'Marsh Sandpiper', 'Pied Avocet', 'Rock Pigeon', 'Rose-ringed Parakeet', 'Scaly-breast Munia', 'Whiskered Tern', 'Wood Sandpiper']
+
+roboflow:
+  workspace: thesis-3flmp
+  project: my-first-project-etech
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/thesis-3flmp/my-first-project-etech/dataset/2
