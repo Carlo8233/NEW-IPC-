@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "458086732976",
+    "firebase_url": "https://bird-app-1d726-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "bird-app-1d726",
+    "storage_bucket": "bird-app-1d726.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458086732976:android:f45c6eede7718d3a409775",
+        "android_client_info": {
+          "package_name": "com.example.birdapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEDKCMlJd9EonSnnFTKJniCfMZ3KqTQ6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
