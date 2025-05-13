@@ -3,7 +3,7 @@
 from ultralytics import YOLO
 
 # Load a model
-model = YOLO('runs/detect/train11/weights/best.pt')  # load a custom model
+model = YOLO('runs/detect/train13/weights/best.pt')  # load a custom model
 
 # Validate the model
 metrics = model.val()  # no arguments needed, dataset and settings remembered
