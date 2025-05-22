@@ -21,11 +21,15 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.google.firebase.auth.UserProfileChangeRequest
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 
 @Composable
 fun SignupScreen(navController: NavHostController) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
+    val scrollState = rememberScrollState()
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -37,8 +41,8 @@ fun SignupScreen(navController: NavHostController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(

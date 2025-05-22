@@ -8,8 +8,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,7 +28,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import java.util.*
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -59,13 +60,11 @@ fun SettingsScreen(navController: NavController) {
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null && userId != null) {
-            // Upload image to Firebase Storage
             val uploadTask = profilePicsRef.putFile(uri)
             uploadTask.addOnSuccessListener {
                 profilePicsRef.downloadUrl.addOnSuccessListener { downloadUri ->
                     val imageUrl = downloadUri.toString()
                     profileImageUrl = imageUrl
-                    // Save URL to Firestore
                     db.collection("users").document(userId)
                         .update("profileImageUrl", imageUrl)
                     Toast.makeText(context, "Profile picture updated", Toast.LENGTH_SHORT).show()
@@ -85,14 +84,14 @@ fun SettingsScreen(navController: NavController) {
                 start = 16.dp,
                 end = 16.dp
             ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
+                .verticalScroll(rememberScrollState()) // <-- SCROLLING ENABLED HERE
                 .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -209,7 +208,7 @@ fun SettingsScreen(navController: NavController) {
                 Text(text = "LOGOUT", fontSize = 16.sp, color = Color.White)
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(80.dp)) // bottom buffer for scroll
         }
 
         BottomNavigationBar(navController, selectedTab = 3) { newIndex ->
